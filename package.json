@@ -1,0 +1,31 @@
+{
+  "name": "nest-mcp-websearch-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A NestJS and TypeScript MCP server with a web search tool",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "tsx src/main.ts",
+    "start:http": "MCP_TRANSPORT=http tsx src/main.ts",
+    "start:watch": "tsx watch src/main.ts"
+  },
+  "engines": {
+    "node": ">=18.18"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.1",
+    "@modelcontextprotocol/hono": "^2.0.1",
+    "@modelcontextprotocol/server": "latest",
+    "@nestjs/common": "latest",
+    "@nestjs/core": "latest",
+    "dotenv": "^18.0.3",
+    "reflect-metadata": "latest",
+    "rxjs": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "tsx": "latest",
+    "typescript": "latest"
+  }
+}
