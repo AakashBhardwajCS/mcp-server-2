@@ -24,7 +24,7 @@ npm run start:http
 
 The MCP endpoint is `http://127.0.0.1:3002/mcp`. Set `PORT` to use a different port.
 
-The server exposes a `websearch` tool with `query` and optional `maxResults` (1-10) arguments. It uses DuckDuckGo's public Instant Answer API and does not require an API key.
+The server exposes a `websearch` tool with `query` and optional `maxResults` (1-10) arguments. It combines Google News RSS (current articles, with source and publish date) and DuckDuckGo's Instant Answer API (encyclopedic summaries). Neither requires an API key. When nothing is found, the tool tells the model not to invent sources.
 
 The server also proxies `list_my_posts`, `get_my_post`, `create_post`, `update_post`, `publish_post`, and `delete_post` to the blog app. Blog validation, authorization, slugs, and persistence remain in the blog app.
 

@@ -7,4 +7,5 @@ import { WebSearchService } from './web_search/web-search.service.js';
 @Module({
   providers: [WebSearchService, BlogBridgeService, McpService],
 })
+
 export class AppModule {}

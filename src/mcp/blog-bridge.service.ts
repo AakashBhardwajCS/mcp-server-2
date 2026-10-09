@@ -1,13 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-
-export const BLOG_TOOL_NAMES = [
-  'list_my_posts',
-  'get_my_post',
-  'create_post',
-  'update_post',
-  'publish_post',
-  'delete_post',
-] as const;
+import BLOG_TOOL_NAMES from '../utils/blog_native_tools.js';
 
 export type BlogToolName = (typeof BLOG_TOOL_NAMES)[number];
 

@@ -10,10 +10,13 @@ import { BlogBridgeService, BlogToolName } from './blog-bridge.service.js';
 
 @Injectable()
 export class McpService implements OnModuleInit {
+
   private readonly logger = new Logger(McpService.name);
+
   constructor(
     @Inject(WebSearchService)
     private readonly webSearchService: WebSearchService,
+    
     @Inject(BlogBridgeService)
     private readonly blogBridgeService: BlogBridgeService,
   ) {}
@@ -35,13 +38,18 @@ export class McpService implements OnModuleInit {
           maxResults: z.number().int().min(1).max(10).default(5).describe('Maximum number of results'),
         }),
       },
+
       async ({ query, maxResults }) => {
         const results = await this.webSearchService.search(query, maxResults);
+        const note = results.length === 0
+          ? 'No results were found. Do not invent facts, figures, sources, or URLs; say that current information could not be found.'
+          : 'Only cite facts and URLs that appear in these results. Do not invent statistics, sources, or links.';
         return {
-          content: [{ type: 'text', text: JSON.stringify({ query, results }, null, 2) }],
+          content: [{ type: 'text', text: JSON.stringify({ query, retrievedAt: new Date().toISOString(), note, results }, null, 2) }],
         };
       },
     );
+
     for (const tool of this.blogBridgeService.tools) {
       server.registerTool(
         tool.name,
@@ -50,27 +58,40 @@ export class McpService implements OnModuleInit {
           inputSchema: this.blogBridgeService.schema(tool.inputSchema) as any,
         },
         async (args: unknown) => {
+
           this.logger.log(`Incoming MCP tool call: ${tool.name} userIdPresent=${Boolean(userId)}`);
+
           const result = await this.blogBridgeService.call(tool.name as BlogToolName, args, userId) as any;
+
           this.logger.log(`MCP tool result: ${tool.name} isError=${Boolean(result.isError)}`);
           return result;
         },
       );
     }
+    
     return server;
+
   }
 
+  // default stdio transport, used when MCP_TRANSPORT is not set to "http"
   start(): void {
     serveStdio(() => this.createServer());
   }
 
+  // http transport, used when MCP_TRANSPORT is set to "http"
   startHttp(port: number): void {
+    
     this.logger.log(`Creating MCP HTTP handler for port ${port}`);
+
     const handler = createMcpHandler((context) => {
+      // user id is needed for blog tool calls, so we extract it from the request headers if present
       const userId = context.requestInfo?.headers.get('x-user-id') ?? undefined;
+
       return this.createServer(userId);
     });
+    
     const app = createMcpHonoApp();
+
     app.all('/mcp', async (context) => {
       const startedAt = Date.now();
       const request = context.req.raw;
@@ -90,7 +111,7 @@ export class McpService implements OnModuleInit {
     });
 
     serve({ fetch: app.fetch, hostname: '127.0.0.1', port }, (info) => {
-      console.error(`MCP HTTP server listening at http://${info.address}:${info.port}/mcp`);
+      this.logger.log(`MCP HTTP server listening at http://${info.address}:${info.port}/mcp`);
     });
   }
 }
